@@ -564,6 +564,22 @@ Instructions:
   }
 });
 
+// API 404 Fallback Handler (Ensure all /api/* errors return JSON)
+app.use("/api/*", (req, res) => {
+  res.status(404).json({
+    error: "অনুরোধকৃত API এন্ডপয়েন্টটি পাওয়া যায়নি (404 Not Found)।",
+  });
+});
+
+// Global Express Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("Unhandled Express Error:", err);
+  res.status(500).json({
+    error: "সার্ভারে অভ্যন্তরীণ সমস্যা হয়েছে।",
+    details: err?.message || String(err),
+  });
+});
+
 // Setup Vite Development Middleware or Production Static Handler
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

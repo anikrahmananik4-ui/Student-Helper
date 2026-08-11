@@ -1,5 +1,23 @@
 import { ChatMessage, ChatMode, QuizQuestion } from '../types';
 
+async function parseJsonResponse(res: Response): Promise<any> {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const rawText = await res.text();
+    console.error('Non-JSON response received from server:', rawText);
+    if (!res.ok) {
+      throw new Error(`সার্ভার সাড়া দিচ্ছে না (${res.status}): ${rawText.slice(0, 80)}`);
+    }
+    throw new Error('সার্ভার থেকে এইচটিএমএল বা অপ্রত্যাশিত রেসপন্স এসেছে।');
+  }
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'আবেদনটি প্রসেস করার সময় এরর ঘটেছে।');
+  }
+  return data;
+}
+
 export async function sendChatMessage(
   messages: ChatMessage[],
   mode: ChatMode = 'General',
@@ -11,10 +29,7 @@ export async function sendChatMessage(
     body: JSON.stringify({ messages, mode, userPreferences }),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'AI উত্তর দিতে পারেনি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -33,10 +48,7 @@ export async function generateWriting(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'লেখা তৈরি করা যায়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -52,10 +64,7 @@ export async function translateText(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'অনুবাদ করা সম্ভব হয়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -70,10 +79,7 @@ export async function rewriteText(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'পুনর্লিখন করা যায়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -88,10 +94,7 @@ export async function summarizeText(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'সংক্ষেপ করা যায়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -108,10 +111,7 @@ export async function studyAssist(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'উত্তর তৈরি করা সম্ভব হয়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -127,10 +127,7 @@ export async function generateQuiz(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'কুইজ তৈরি করা সম্ভব হয়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.quiz;
 }
 
@@ -147,10 +144,7 @@ export async function generateSocial(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'সোশ্যাল পোস্ট জেনারেট করা সম্ভব হয়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -170,10 +164,7 @@ export async function generateEmail(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'ইমেইল তৈরি সম্ভব হয়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -195,10 +186,7 @@ export async function generateCV(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'সিভি তৈরি করা সম্ভব হয়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -213,10 +201,7 @@ export async function generatePrompt(payload: {
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'প্রম্পট জেনারেট করা সম্ভব হয়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
@@ -226,18 +211,12 @@ export async function analyzeDocument(formData: FormData): Promise<string> {
     body: formData,
   });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'ডকুমেন্ট এনালাইজ করা সম্ভব হয়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.text;
 }
 
 export async function fetchAdminStats(): Promise<any> {
   const res = await fetch('/api/admin/stats');
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'এডমিন ডেটা লোড করা যায়নি।');
-  }
+  const data = await parseJsonResponse(res);
   return data.stats;
 }
