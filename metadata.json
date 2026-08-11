@@ -1,0 +1,6 @@
+{
+  "name": "BanglaMate AI",
+  "description": "বাংলায় AI — কথা, লেখা, অনুবাদ ও কাজ এক জায়গায়",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
