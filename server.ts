@@ -596,9 +596,15 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`BanglaMate AI Server running on http://0.0.0.0:${PORT}`);
-  });
+  // Only start standalone listener when not running in Vercel serverless environment
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`BanglaMate AI Server running on http://0.0.0.0:${PORT}`);
+    });
+  }
 }
 
 startServer();
+
+export default app;
+
