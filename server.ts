@@ -2,7 +2,6 @@ import express from "express";
 import path from "path";
 import multer from "multer";
 import { GoogleGenAI } from "@google/genai";
-import { createServer as createViteServer } from "vite";
 
 // Setup Express app
 const app = express();
@@ -583,12 +582,13 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Setup Vite Development Middleware or Production Static Handler
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (!process.env.VERCEL) {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
@@ -596,7 +596,6 @@ async function startServer() {
     });
   }
 
-  // Only start standalone listener when not running in Vercel serverless environment
   if (!process.env.VERCEL) {
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`BanglaMate AI Server running on http://0.0.0.0:${PORT}`);
@@ -604,7 +603,9 @@ async function startServer() {
   }
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
 
 export default app;
 
